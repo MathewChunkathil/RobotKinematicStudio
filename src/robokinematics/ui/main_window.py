@@ -687,8 +687,8 @@ class CalcExplorer(QWidget):
             f"Jacobian J(q) [6×{len(robot.joints)}]:\n"
             f"{np.array2string(ja.jacobian, precision=4, suppress_small=True)}\n\n"
             f"Singular Values: {np.array2string(ja.singular_values, precision=4)}\n"
-            f"Rank: {ja.rank}   Condition Number: {ja.condition_number:.3f}\n"
-            f"Manipulability : {ja.manipulability:.5f}"
+            f"Rank: {ja.rank}   Condition Number: {f'{ja.condition_number:.3f}' if ja.condition_number is not None else 'N/A'}\n"
+            f"Manipulability : {f'{ja.manipulability:.5f}' if ja.manipulability is not None else 'N/A'}"
         )
 
 
