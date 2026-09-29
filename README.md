@@ -29,11 +29,18 @@ An interactive, high-performance serial robotic manipulator kinematics simulator
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Python 3.10 or higher
-- GPU recommended for optimal 3D OpenGL frame rates
+### ⚡ 1-Click Launch (No Terminal Needed!)
 
-### Installation
+- **Windows**: Simply double-click **`run.bat`** (or `run.py`).
+  > *On first run, `run.bat` will automatically detect Python, configure `.venv`, install required dependencies, and launch the application seamlessly without keeping a console window open.*
+- **Linux / macOS**: Double-click or run:
+  ```bash
+  ./run.sh
+  ```
+
+---
+
+### Manual Setup (Optional)
 
 1. **Clone the repository:**
    ```bash
