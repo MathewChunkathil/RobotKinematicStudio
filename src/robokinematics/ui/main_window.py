@@ -298,33 +298,40 @@ class FKPanel(QWidget):
 
             # Slider + spinbox
             ctrl = QHBoxLayout()
+            is_rev = joint.type == JointType.REVOLUTE
             lo = int(joint.limits.position_min * 1000)
             hi = int(joint.limits.position_max * 1000)
             slider = QSlider(Qt.Orientation.Horizontal)
             slider.setRange(lo, hi); slider.setValue(0)
 
             spin = QDoubleSpinBox()
-            spin.setRange(joint.limits.position_min, joint.limits.position_max)
-            spin.setDecimals(3); spin.setSingleStep(0.05); spin.setValue(0.0)
-            spin.setFixedWidth(70)
+            if is_rev:
+                spin.setRange(math.degrees(joint.limits.position_min), math.degrees(joint.limits.position_max))
+                spin.setDecimals(1); spin.setSingleStep(1.0); spin.setSuffix("°")
+            else:
+                spin.setRange(joint.limits.position_min * 1000.0, joint.limits.position_max * 1000.0)
+                spin.setDecimals(1); spin.setSingleStep(5.0); spin.setSuffix(" mm")
+            spin.setFixedWidth(84)
 
             def _mk(j=joint, s=slider, sp=spin, vl=val_l):
                 def _fmt(q):
                     if j.type == JointType.REVOLUTE:
                         return f"{math.degrees(q):+.1f}°  ({q:+.4f} rad)"
-                    return f"{q * 100:+.2f} cm  ({q:+.4f} m)"
+                    return f"{q * 1000.0:+.1f} mm"
 
                 def on_s(v):
                     if self._lock: return
                     self._lock = True
                     q = v / 1000.0
-                    sp.setValue(q); vl.setText(_fmt(q))
+                    val_ui = math.degrees(q) if j.type == JointType.REVOLUTE else q * 1000.0
+                    sp.setValue(val_ui); vl.setText(_fmt(q))
                     self._lock = False
                     self.joints_moved.emit(self._get_q())
 
-                def on_sp(q):
+                def on_sp(val_ui):
                     if self._lock: return
                     self._lock = True
+                    q = math.radians(val_ui) if j.type == JointType.REVOLUTE else val_ui / 1000.0
                     s.setValue(int(q * 1000)); vl.setText(_fmt(q))
                     self._lock = False
                     self.joints_moved.emit(self._get_q())
@@ -339,9 +346,8 @@ class FKPanel(QWidget):
 
             # Limit labels
             ll = QHBoxLayout()
-            is_rev = joint.type == JointType.REVOLUTE
-            lo_str = f"{math.degrees(joint.limits.position_min):.0f}°" if is_rev else f"{joint.limits.position_min:.2f} m"
-            hi_str = f"{math.degrees(joint.limits.position_max):.0f}°" if is_rev else f"{joint.limits.position_max:.2f} m"
+            lo_str = f"{math.degrees(joint.limits.position_min):.0f}°" if is_rev else f"{joint.limits.position_min * 1000.0:.0f} mm"
+            hi_str = f"{math.degrees(joint.limits.position_max):.0f}°" if is_rev else f"{joint.limits.position_max * 1000.0:.0f} mm"
             lbl_min = QLabel(f"<span style='color:{DIM};font-size:10px;'>Min {lo_str}</span>")
             lbl_min.setTextFormat(Qt.TextFormat.RichText)
             lbl_max = QLabel(f"<span style='color:{DIM};font-size:10px;'>Max {hi_str}</span>")
@@ -360,18 +366,27 @@ class FKPanel(QWidget):
         self._clay.addStretch()
 
     def _get_q(self) -> list[float]:
-        return [sp.value() for sp in self._spins]
+        if not self._robot:
+            return []
+        res = []
+        for sp, j in zip(self._spins, self._robot.joints):
+            val_ui = sp.value()
+            q = math.radians(val_ui) if j.type == JointType.REVOLUTE else val_ui / 1000.0
+            res.append(q)
+        return res
 
     def set_joint_positions(self, positions: list[float]):
         if not self._robot:
             return
         self._lock = True
         for q, s, sp, vl, j in zip(positions, self._sliders, self._spins, self._vlabels, self._robot.joints):
-            sp.setValue(q); s.setValue(int(q * 1000))
+            val_ui = math.degrees(q) if j.type == JointType.REVOLUTE else q * 1000.0
+            sp.setValue(val_ui)
+            s.setValue(int(q * 1000))
             if j.type == JointType.REVOLUTE:
                 vl.setText(f"{math.degrees(q):+.1f}°  ({q:+.4f} rad)")
             else:
-                vl.setText(f"{q * 100:+.2f} cm  ({q:+.4f} m)")
+                vl.setText(f"{q * 1000.0:+.1f} mm")
         self._lock = False
 
     def _home(self):
@@ -420,14 +435,14 @@ class IKPanel(QWidget):
 
         self._sx = QDoubleSpinBox(); self._sy = QDoubleSpinBox(); self._sz = QDoubleSpinBox()
         for spin in (self._sx, self._sy, self._sz):
-            spin.setRange(-5.0, 5.0); spin.setDecimals(3); spin.setSingleStep(0.02)
+            spin.setRange(-5000.0, 5000.0); spin.setDecimals(1); spin.setSingleStep(10.0); spin.setSuffix(" mm")
 
-        for axis, spin in [("X (m)", self._sx), ("Y (m)", self._sy), ("Z (m)", self._sz)]:
+        for axis, spin in [("X (mm)", self._sx), ("Y (mm)", self._sy), ("Z (mm)", self._sz)]:
             row = QHBoxLayout()
             row.addWidget(QLabel(f"<b>{axis}:</b>"))
             row.addWidget(spin, stretch=1)
-            for sign, delta in [("−", -0.05), ("+", 0.05)]:
-                b = QPushButton(sign); b.setFixedWidth(22); b.setObjectName("small")
+            for sign, delta in [("−", -50.0), ("+", 50.0)]:
+                b = QPushButton(sign); b.setFixedWidth(26); b.setObjectName("small")
                 b.clicked.connect(lambda _, s=spin, d=delta: s.setValue(s.value() + d))
                 row.addWidget(b)
             tl.addLayout(row)
@@ -484,14 +499,18 @@ class IKPanel(QWidget):
         lay.addWidget(traj_gb)
 
     def set_target_pose(self, x: float, y: float, z: float):
-        self._sx.setValue(x); self._sy.setValue(y); self._sz.setValue(z)
+        # x, y, z are in meters — convert to mm for UI
+        self._sx.setValue(x * 1000.0)
+        self._sy.setValue(y * 1000.0)
+        self._sz.setValue(z * 1000.0)
         self._emit_target()
 
     def _emit_target(self):
         mode = "point" if self._mode.currentIndex() == 0 else "pose"
+        # Convert mm from UI to SI meters for kinematics solver
         target = Target(
             id=str(uuid.uuid4()), mode=mode,
-            pose=Pose(position=[self._sx.value(), self._sy.value(), self._sz.value()]),
+            pose=Pose(position=[self._sx.value() / 1000.0, self._sy.value() / 1000.0, self._sz.value() / 1000.0]),
             position_tolerance=0.002,
         )
         self.target_changed.emit(target)
@@ -547,11 +566,11 @@ class DHPanel(QWidget):
 
         self._tbl = QTableWidget(0, 8)
         self._tbl.setHorizontalHeaderLabels(
-            ["Joint", "Type", "θ (rad)", "d (m)", "a (m)", "α (rad)", "q_min", "q_max"]
+            ["Joint", "Type", "θ (deg)", "d (mm)", "a (mm)", "α (deg)", "q_min", "q_max"]
         )
         hdr = self._tbl.horizontalHeader()
         hdr.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
-        for c, w in enumerate([90, 90, 75, 70, 70, 75, 68, 68]):
+        for c, w in enumerate([90, 90, 75, 75, 75, 75, 75, 75]):
             self._tbl.setColumnWidth(c, w)
         self._del = _JointTypeDelegate(self._tbl)
         self._tbl.setItemDelegateForColumn(1, self._del)
@@ -571,9 +590,15 @@ class DHPanel(QWidget):
             name.setForeground(QColor(DIM))
             self._tbl.setItem(row, 0, name)
             self._tbl.setItem(row, 1, QTableWidgetItem(j.type.value))
-            for col, v in enumerate([j.dh.theta, j.dh.d, j.dh.a, j.dh.alpha,
-                                      j.limits.position_min, j.limits.position_max], start=2):
-                self._tbl.setItem(row, col, QTableWidgetItem(f"{v:.4f}"))
+            is_rev = j.type == JointType.REVOLUTE
+            th_deg  = math.degrees(j.dh.theta)
+            d_mm    = j.dh.d * 1000.0
+            a_mm    = j.dh.a * 1000.0
+            al_deg  = math.degrees(j.dh.alpha)
+            qmin_ui = math.degrees(j.limits.position_min) if is_rev else j.limits.position_min * 1000.0
+            qmax_ui = math.degrees(j.limits.position_max) if is_rev else j.limits.position_max * 1000.0
+            for col, v in enumerate([th_deg, d_mm, a_mm, al_deg, qmin_ui, qmax_ui], start=2):
+                self._tbl.setItem(row, col, QTableWidgetItem(f"{v:.1f}"))
         self._tbl.blockSignals(False)
 
     def _apply(self):
@@ -591,11 +616,17 @@ class DHPanel(QWidget):
                     continue
                 jt = JointType.REVOLUTE if cells[0].text().strip().lower() == "revolute" else JointType.PRISMATIC
                 vals = [float(cells[i].text()) for i in range(1, 7)]
+                theta = math.radians(vals[0])
+                d_m   = vals[1] / 1000.0
+                a_m   = vals[2] / 1000.0
+                alpha = math.radians(vals[3])
+                qmin  = math.radians(vals[4]) if jt == JointType.REVOLUTE else vals[4] / 1000.0
+                qmax  = math.radians(vals[5]) if jt == JointType.REVOLUTE else vals[5] / 1000.0
                 new_joints.append(j.model_copy(update={
                     "type": jt,
-                    "dh": DHParameters(theta=vals[0], d=vals[1], a=vals[2], alpha=vals[3]),
+                    "dh": DHParameters(theta=theta, d=d_m, a=a_m, alpha=alpha),
                     "limits": j.limits.model_copy(update={
-                        "position_min": vals[4], "position_max": vals[5]
+                        "position_min": qmin, "position_max": qmax
                     }),
                 }))
             self._robot = self._robot.model_copy(update={"joints": new_joints})
@@ -682,7 +713,7 @@ class CalcExplorer(QWidget):
         self._txt.setPlainText(
             f"=== {robot.name} ({len(robot.joints)} DOF) ===\n"
             f"q = [{', '.join(f'{x:+.4f}' for x in q)}]\n\n"
-            f"EE Position : [{ep[0]:+.5f},  {ep[1]:+.5f},  {ep[2]:+.5f}]\n\n"
+            f"EE Position : [{ep[0]*1000:+.2f} mm,  {ep[1]*1000:+.2f} mm,  {ep[2]*1000:+.2f} mm]\n\n"
             f"T_0^EE:\n{np.array2string(ee, precision=4, suppress_small=True)}\n\n"
             f"Jacobian J(q) [6×{len(robot.joints)}]:\n"
             f"{np.array2string(ja.jacobian, precision=4, suppress_small=True)}\n\n"
@@ -840,7 +871,7 @@ class MainWindow(QMainWindow):
 
         self._hud_title = QLabel("RoboKinematics Studio")
         self._hud_title.setStyleSheet(f"color:{CYAN}; font-weight:700; font-size:11px;")
-        self._hud_pos   = QLabel("EE:  X: +0.000 m   Y: +0.000 m   Z: +0.000 m")
+        self._hud_pos   = QLabel("EE:  X: +0.0 mm   Y: +0.0 mm   Z: +0.0 mm")
         self._hud_pos.setStyleSheet(f"color:{TEXT}; font-family:monospace; font-size:11px;")
         self._hud_rot   = QLabel("RPY: R: +0.0°   P: +0.0°   Y: +0.0°")
         self._hud_rot.setStyleSheet(f"color:{DIM}; font-family:monospace; font-size:10px;")
@@ -946,7 +977,7 @@ class MainWindow(QMainWindow):
 
     def _update_hud(self, ee: np.ndarray):
         p = ee[:3, 3]
-        self._hud_pos.setText(f"EE:  X:{p[0]:+.3f} m   Y:{p[1]:+.3f} m   Z:{p[2]:+.3f} m")
+        self._hud_pos.setText(f"EE:  X:{p[0]*1000:+.1f} mm   Y:{p[1]*1000:+.1f} mm   Z:{p[2]*1000:+.1f} mm")
         try:
             rpy = Rotation.from_matrix(ee[:3, :3]).as_euler("xyz", degrees=True)
             self._hud_rot.setText(f"RPY: R:{rpy[0]:+.1f}°   P:{rpy[1]:+.1f}°   Y:{rpy[2]:+.1f}°")
