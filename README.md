@@ -1,62 +1,90 @@
-# RoboKinematics Studio
+# N-DOF Arm Simulator (RoboKinematics Studio)
 
-A configurable serial robotic-manipulator engineering application.
+An interactive, high-performance serial robotic manipulator kinematics simulator and engineering design suite built with Python, PyQt6, and OpenGL.
 
-## Core workflow
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GUI: PyQt6 + OpenGL](https://img.shields.io/badge/GUI-PyQt6%20%2B%20OpenGL-green.svg)](https://riverbankcomputing.com/software/pyqt/)
 
-Configure robot → DH model → FK → place target → IK → validate → analyze → recommend → ghost alternatives → trajectory → playback → calculation inspection.
+---
 
-## Current status
+## ✨ Key Features
 
-This repository is an **engineering scaffold**. The specifications are complete, but the robotics engine and polished UI are intentionally implemented phase-by-phase rather than generated as one giant code dump.
+- **60 FPS GPU-Accelerated 3D Viewport**: Smooth rendering using `pyqtgraph.opengl` with closed-cap cylinder links, sphere joints, dynamic coordinate frame triads, and grid reference.
+- **Forward Kinematics (FK)**: Real-time slider-driven joint manipulation with interactive 60 FPS animation, hardware-accelerated joint updates, and immediate end-effector pose tracking.
+- **Inverse Kinematics (IK) Engine**:
+  - Analytical and numerical (Levenberg-Marquardt / Damped Least Squares) IK solvers.
+  - Multi-candidate solution generation and ranking.
+  - **Ghost Overlays**: Semi-transparent holographic rendering of alternative IK branch solutions in the 3D viewport.
+- **Jacobian & Singularity Analysis**:
+  - Real-time $6 \times N$ geometric Jacobian calculation.
+  - Singular value decomposition (SVD), manipulability index ($\sqrt{\det(J J^T)}$), condition number, and singularity warnings.
+- **Trajectory Generation & Playback**:
+  - Cartesian linear interpolation and joint-space cubic/quintic polynomial splines.
+  - 3D ribbon trajectory path visualization with play, pause, stop, and scrub controls.
+- **Workspace Reachability Cloud**: Point cloud generation for reachable workspace estimation.
+- **Configurable Robot Architectures**: Pre-configured standard robots (UR5, PUMA 560, SCARA, 2-Link planar) plus a live DH parameter editor.
 
-## Read first
+---
 
-- `00_MASTER_SPEC.md`
-- `01_REQUIREMENTS.md`
-- `02_ROBOTICS_SPEC.md`
-- `03_DATA_MODEL.md`
-- `04_ARCHITECTURE.md`
-- `05_VISUAL_UX_SPEC.md`
-- `06_TECH_STACK.md`
-- `07_TEST_PLAN.md`
-- `08_DEVELOPMENT_PLAN.md`
-- `09_ANTIGRAVITY_INSTRUCTIONS.md`
-- `10_ACCEPTANCE_TESTS.md`
-- `11_OUT_OF_SCOPE.md`
+## 🚀 Quick Start
 
-## Setup
+### Prerequisites
+- Python 3.10 or higher
+- GPU recommended for optimal 3D OpenGL frame rates
 
-Create a virtual environment and install development dependencies:
+### Installation
 
-```bash
-python -m venv .venv
-# Windows PowerShell:
-.venv\Scripts\Activate.ps1
-# macOS/Linux:
-# source .venv/bin/activate
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/MathewChunkathil/ndof-arm-simulator.git
+   cd ndof-arm-simulator
+   ```
 
-pip install -e ".[dev]"
-```
+2. **Create and activate a virtual environment:**
+   ```bash
+   python -m venv .venv
+   # Windows PowerShell:
+   .venv\Scripts\Activate.ps1
+   # macOS/Linux:
+   source .venv/bin/activate
+   ```
 
-Run tests:
+3. **Install dependencies:**
+   ```bash
+   pip install -e ".[dev]"
+   ```
+
+4. **Launch the simulator:**
+   ```bash
+   python -m robokinematics.app.main
+   ```
+
+---
+
+## 🧪 Testing
+
+Run the automated test suite (30 unit & numerical IK/Jacobian tests):
 
 ```bash
 pytest
 ```
 
-Run lint:
+---
 
-```bash
-ruff check .
+## 🛠️ Architecture
+
+```
+src/robokinematics/
+├── app/             # Application lifecycle, state controller & thread management
+├── domain/          # Core models (RobotDefinition, DH parameters, poses, limits)
+├── robotics/        # Kinematic math (FK, IK solvers, Jacobian, trajectory, workspace)
+├── ui/              # PyQt6 dark-theme GUI (3D viewport, FK sliders, inspectors, HUD)
+└── visualization/   # GPU-accelerated OpenGL scene graph (meshes, ghosts, clouds, ribbons)
 ```
 
-Run the application scaffold:
+---
 
-```bash
-robokinematics
-```
+## 📄 License
 
-## Development rule
-
-Do not ask an agent to build the entire project in one pass. Implement one development phase at a time and verify it.
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
