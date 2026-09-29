@@ -1,0 +1,62 @@
+{
+  "id": "ur5_style_6dof",
+  "name": "6-DOF Universal Arm (UR5-style)",
+  "description": "6-DOF industrial arm based on Universal Robots UR5 DH parameters. Standard DH convention. All-revolute.",
+  "units": { "length": "m", "angle": "rad", "time": "s" },
+  "base_translation": [0.0, 0.0, 0.0],
+  "base_rotation": [[1,0,0],[0,1,0],[0,0,1]],
+  "end_effector_translation": [0.0, 0.0, 0.0],
+  "end_effector_rotation": [[1,0,0],[0,1,0],[0,0,1]],
+  "joints": [
+    {
+      "id": "j0", "index": 0, "name": "Shoulder Pan",
+      "type": "revolute",
+      "dh": { "theta": 0.0, "d": 0.0892, "a": 0.0, "alpha": 1.5708 },
+      "limits": { "position_min": -3.1416, "position_max": 3.1416, "velocity_max": 2.094, "acceleration_max": 8.0 },
+      "visual": { "radius": 0.055, "depth": 0.08 }
+    },
+    {
+      "id": "j1", "index": 1, "name": "Shoulder Lift",
+      "type": "revolute",
+      "dh": { "theta": 0.0, "d": 0.0, "a": -0.4250, "alpha": 0.0 },
+      "limits": { "position_min": -3.1416, "position_max": 3.1416, "velocity_max": 2.094, "acceleration_max": 8.0 },
+      "visual": { "radius": 0.05, "depth": 0.075 }
+    },
+    {
+      "id": "j2", "index": 2, "name": "Elbow",
+      "type": "revolute",
+      "dh": { "theta": 0.0, "d": 0.0, "a": -0.3922, "alpha": 0.0 },
+      "limits": { "position_min": -3.1416, "position_max": 3.1416, "velocity_max": 3.141, "acceleration_max": 8.0 },
+      "visual": { "radius": 0.045, "depth": 0.07 }
+    },
+    {
+      "id": "j3", "index": 3, "name": "Wrist 1",
+      "type": "revolute",
+      "dh": { "theta": 0.0, "d": 0.1093, "a": 0.0, "alpha": 1.5708 },
+      "limits": { "position_min": -3.1416, "position_max": 3.1416, "velocity_max": 3.141, "acceleration_max": 8.0 },
+      "visual": { "radius": 0.04, "depth": 0.065 }
+    },
+    {
+      "id": "j4", "index": 4, "name": "Wrist 2",
+      "type": "revolute",
+      "dh": { "theta": 0.0, "d": 0.0946, "a": 0.0, "alpha": -1.5708 },
+      "limits": { "position_min": -3.1416, "position_max": 3.1416, "velocity_max": 3.141, "acceleration_max": 8.0 },
+      "visual": { "radius": 0.04, "depth": 0.065 }
+    },
+    {
+      "id": "j5", "index": 5, "name": "Wrist 3",
+      "type": "revolute",
+      "dh": { "theta": 0.0, "d": 0.0823, "a": 0.0, "alpha": 0.0 },
+      "limits": { "position_min": -6.2832, "position_max": 6.2832, "velocity_max": 3.141, "acceleration_max": 8.0 },
+      "visual": { "radius": 0.038, "depth": 0.06 }
+    }
+  ],
+  "links": [
+    { "id": "l0", "index": 0, "name": "Base Link",    "visual": { "length": 0.0892, "width": 0.05, "height": 0.05 } },
+    { "id": "l1", "index": 1, "name": "Upper Arm",    "visual": { "length": 0.425,  "width": 0.045,"height": 0.045 } },
+    { "id": "l2", "index": 2, "name": "Forearm",      "visual": { "length": 0.3922, "width": 0.04, "height": 0.04 } },
+    { "id": "l3", "index": 3, "name": "Wrist Link 1", "visual": { "length": 0.1093, "width": 0.035,"height": 0.035 } },
+    { "id": "l4", "index": 4, "name": "Wrist Link 2", "visual": { "length": 0.0946, "width": 0.035,"height": 0.035 } },
+    { "id": "l5", "index": 5, "name": "Tool Flange",  "visual": { "length": 0.0823, "width": 0.03, "height": 0.03 } }
+  ]
+}

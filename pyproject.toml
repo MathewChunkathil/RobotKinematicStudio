@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "robokinematics-studio"
+version = "0.1.0"
+description = "Configurable robotic manipulator modelling, kinematic analysis, multi-solution IK, and interactive 3D simulation."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=2.0",
+    "scipy>=1.13",
+    "PySide6>=6.7",
+    "pyvista>=0.43",
+    "pyvistaqt>=0.11",
+    "pyqtgraph>=0.13",
+    "pydantic>=2.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+    "pyright>=1.1",
+]
+
+[project.scripts]
+robokinematics = "robokinematics.app.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.pyright]
+include = ["src", "tests"]
+typeCheckingMode = "basic"

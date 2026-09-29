@@ -1,0 +1,190 @@
+{
+  "id": "reference-4dof",
+  "name": "Reference 4-DOF Revolute Manipulator",
+  "description": "Initial reference robot. Values are intentionally editable project data.",
+  "units": {
+    "length": "m",
+    "angle": "rad",
+    "time": "s"
+  },
+  "joints": [
+    {
+      "id": "j1",
+      "index": 0,
+      "name": "Joint 1",
+      "type": "revolute",
+      "dh": {
+        "theta": 0,
+        "d": 0.12,
+        "a": 0.3,
+        "alpha": 1.5707963267948966
+      },
+      "limits": {
+        "position_min": -3.141592653589793,
+        "position_max": 3.141592653589793,
+        "velocity_max": 2.0,
+        "acceleration_max": 4.0
+      },
+      "visual": {
+        "radius": 0.055,
+        "depth": 0.08
+      }
+    },
+    {
+      "id": "j2",
+      "index": 1,
+      "name": "Joint 2",
+      "type": "revolute",
+      "dh": {
+        "theta": 0,
+        "d": 0,
+        "a": 0.35,
+        "alpha": 0
+      },
+      "limits": {
+        "position_min": -1.5707963267948966,
+        "position_max": 1.5707963267948966,
+        "velocity_max": 2.0,
+        "acceleration_max": 4.0
+      },
+      "visual": {
+        "radius": 0.05,
+        "depth": 0.08
+      }
+    },
+    {
+      "id": "j3",
+      "index": 2,
+      "name": "Joint 3",
+      "type": "revolute",
+      "dh": {
+        "theta": 0,
+        "d": 0,
+        "a": 0.25,
+        "alpha": 0
+      },
+      "limits": {
+        "position_min": -2.0943951023931953,
+        "position_max": 2.0943951023931953,
+        "velocity_max": 2.0,
+        "acceleration_max": 4.0
+      },
+      "visual": {
+        "radius": 0.045,
+        "depth": 0.08
+      }
+    },
+    {
+      "id": "j4",
+      "index": 3,
+      "name": "Joint 4",
+      "type": "revolute",
+      "dh": {
+        "theta": 0,
+        "d": 0.08,
+        "a": 0,
+        "alpha": 0
+      },
+      "limits": {
+        "position_min": -3.141592653589793,
+        "position_max": 3.141592653589793,
+        "velocity_max": 2.5,
+        "acceleration_max": 5.0
+      },
+      "visual": {
+        "radius": 0.04,
+        "depth": 0.07
+      }
+    }
+  ],
+  "links": [
+    {
+      "id": "l1",
+      "index": 0,
+      "name": "Link 1",
+      "visual": {
+        "length": 0.3,
+        "width": 0.08,
+        "height": 0.08,
+        "shape": "box"
+      }
+    },
+    {
+      "id": "l2",
+      "index": 1,
+      "name": "Link 2",
+      "visual": {
+        "length": 0.35,
+        "width": 0.075,
+        "height": 0.075,
+        "shape": "box"
+      }
+    },
+    {
+      "id": "l3",
+      "index": 2,
+      "name": "Link 3",
+      "visual": {
+        "length": 0.25,
+        "width": 0.07,
+        "height": 0.07,
+        "shape": "box"
+      }
+    },
+    {
+      "id": "l4",
+      "index": 3,
+      "name": "Tool Link",
+      "visual": {
+        "length": 0.08,
+        "width": 0.06,
+        "height": 0.06,
+        "shape": "box"
+      }
+    }
+  ],
+  "base_translation": [
+    0,
+    0,
+    0
+  ],
+  "base_rotation": [
+    [
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ]
+  ],
+  "end_effector_translation": [
+    0,
+    0,
+    0
+  ],
+  "end_effector_rotation": [
+    [
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ]
+  ]
+}
