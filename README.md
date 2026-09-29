@@ -24,6 +24,7 @@ An interactive, high-performance serial robotic manipulator kinematics simulator
   - 3D ribbon trajectory path visualization with play, pause, stop, and scrub controls.
 - **Workspace Reachability Cloud**: Point cloud generation for reachable workspace estimation.
 - **Configurable Robot Architectures**: Pre-configured standard robots (UR5, PUMA 560, SCARA, 2-Link planar) plus a live DH parameter editor.
+- **Recent Additions & Roadmap**: See [NEW_FEATURES.md](NEW_FEATURES.md) for dark/light theme details, FK mathematical suite, realistic workcell updates, and future plans.
 
 ---
 
